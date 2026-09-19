@@ -1,0 +1,310 @@
+You are continuing development of an existing working 2D browser game.
+
+I am providing two files:
+
+1. GAME_SPEC.md — the game's specification and intended design.
+2. index.html — the existing working game implementation generated previously.
+
+IMPORTANT:
+The supplied index.html is already a functional game. DO NOT rebuild the game from scratch. DO NOT replace the existing implementation with a completely different game. Preserve everything that already works and improve it incrementally.
+
+First inspect both files carefully and understand the existing implementation before making changes.
+
+==================================================
+PRIMARY GOAL
+==================================================
+
+Polish and extend the existing game so it feels like a complete, polished 2D browser game rather than a basic HTML prototype.
+
+Keep the existing visual identity and gameplay foundation wherever possible.
+
+Do NOT migrate the project to Unity, Godot, Phaser, or another game engine/framework. We have a very limited amount of time, so migration would create unnecessary risk.
+
+Do NOT introduce unnecessary programming languages or technologies.
+
+==================================================
+1. FULLSCREEN GAME START
+==================================================
+
+When the player clicks "START JOURNEY":
+
+- Request browser fullscreen using the standard Fullscreen API.
+- Start the game after the fullscreen request.
+- If fullscreen is unavailable or denied by the browser, the game must still continue normally.
+- The game should resize correctly to the available screen.
+- Do not stretch or distort characters or gameplay.
+- Support both desktop/laptop and mobile browsers.
+- Handle fullscreen changes gracefully.
+- ESC on desktop should allow the player to exit fullscreen normally.
+- Do not create a fake fullscreen implementation.
+
+==================================================
+2. REMOVE THE CURRENT OPENING ANIMATION
+==================================================
+
+The current opening/cinematic animation does not fit the visual language of the existing 2D game.
+
+Remove that opening animation.
+
+Replace it with a simple black-background instructional sequence.
+
+Do not add another cinematic animation at this stage.
+
+==================================================
+3. INSTRUCTION / SHORTCUT SEQUENCE
+==================================================
+
+After starting the journey, show short instructional messages one after another on a BLACK background before gameplay begins.
+
+IMPORTANT:
+Do NOT use headings such as:
+
+"TIP"
+"RULE"
+"WARNING"
+"IMPORTANT"
+
+Instead, write natural gameplay instructions such as:
+
+"Use W A S D to move around."
+
+"Press SPACE to jump over obstacles."
+
+"Collect Modaks to increase your score."
+
+"Taking damage repeatedly will reduce your health."
+
+"Watch for enemy attack indicators."
+
+Use wording that naturally explains what the player should do or what will happen.
+
+Requirements:
+
+- Black background.
+- Clean, centered text.
+- No yellow border.
+- No decorative yellow box.
+- No Skip button.
+- No Continue button.
+- Automatically advance from one message to the next.
+- Give each message enough time to comfortably read.
+- Use subtle fade transitions if they fit the existing style.
+- Keep the sequence short and unobtrusive.
+
+The instructional sequence should feel like part of the game, not like a webpage tutorial.
+
+==================================================
+4. EXTEND THE GAME WITH ONE MEANINGFUL STORY CHAPTER
+==================================================
+
+The current game ends too quickly.
+
+Do NOT artificially extend the existing levels by making the player walk around longer or repeatedly collect the same objects.
+
+Add ONE meaningful additional story/gameplay chapter.
+
+The additional chapter should strengthen the narrative progression toward the confrontation with Gajamukhasura.
+
+The story should feel coherent with the existing Vinayaka/Mushak narrative.
+
+The new chapter should contain actual gameplay objectives and/or challenges, not just dialogue or walking.
+
+Use the existing characters, mechanics, art style and systems wherever possible.
+
+Do not create a huge new system that risks breaking the existing game.
+
+The overall story should have a clear progression:
+
+peaceful beginning
+→ helping Parvati
+→ growing disturbance / conflict
+→ escalation toward the Asura
+→ journey/confrontation
+→ Gajamukhasura battle
+→ transformation
+→ Mushak becoming Vinayaka's vahana
+→ ending
+
+The additional chapter should fit naturally into this progression.
+
+IMPORTANT:
+Do not invent unnecessary mythology or present a newly invented story as historical fact.
+
+Our game is using the Gajamukhasura-to-Mushak narrative already established in the existing game.
+
+==================================================
+5. PRESERVE THE TWO-CHARACTER GAMEPLAY
+==================================================
+
+Maintain the distinction between Mushak and Vinayaka.
+
+Mushak should be useful for:
+- movement/scouting
+- collecting
+- navigating smaller areas
+- assisting Vinayaka
+- objectives appropriate to Mushak
+
+Vinayaka should be useful for:
+- combat
+- dealing with stronger obstacles/enemies
+- the major confrontation
+- the final Gajamukhasura battle
+
+Do not make the game simply longer by repeating the same mechanic.
+
+Use the character differences to create gameplay variety.
+
+==================================================
+6. IMPROVE OBSTACLE READABILITY
+==================================================
+
+There is currently a visual readability problem.
+
+Some obstacles have colors that blend with nearby environmental objects. They can look like ordinary objects or diamond-shaped decorations.
+
+Fix this without redesigning the entire visual style.
+
+Obstacles should:
+
+- have clearly higher visual contrast than ordinary environmental objects
+- have a distinct silhouette/readable shape
+- use a slightly different color treatment from nearby decorative objects
+- optionally use a subtle outline/rim-light or restrained highlight
+- remain consistent with the existing 2D art style
+- be immediately recognizable as hazards
+
+IMPORTANT:
+Do NOT make obstacles excessively bright, neon, or cartoonishly glowing.
+
+Do NOT change the entire game's color palette.
+
+Only improve the visual distinction of hazards.
+
+The player should be able to understand "this can hurt me" quickly without guessing.
+
+==================================================
+7. BOSS / GAMES FEEL POLISH
+==================================================
+
+Improve the existing gameplay feel without replacing the existing mechanics.
+
+Where appropriate, improve:
+
+- attack feedback
+- hit feedback
+- enemy reactions
+- particles
+- subtle screen shake
+- impact effects
+- transitions
+- animation timing
+- health feedback
+- boss phase readability
+- sound feedback if the current implementation supports it
+
+Keep effects restrained and consistent with the game's 2D style.
+
+Do not turn the game into a visual-effects demo.
+
+==================================================
+8. WIN / LOSE / REPLAY
+==================================================
+
+Ensure the game has a clear success and failure state.
+
+WIN:
+- Successfully defeat Gajamukhasura.
+- Continue to the transformation/vahana ending.
+- Show final score/result.
+- Provide a clear Play Again option.
+
+LOSE:
+- If the player's health/required battle condition reaches failure, show a proper lose state.
+- Explain that the player can retry.
+- Provide a Retry/Play Again option.
+- Reset the relevant game state correctly.
+
+Do not allow broken state to persist between retries.
+
+==================================================
+9. KEEP THE EXISTING START MENU CLEAN
+==================================================
+
+Do NOT add a logo back to the starting/main menu if the existing implementation does not currently have one.
+
+Preserve the clean starting presentation.
+
+Do not reintroduce older design decisions that conflict with these latest instructions.
+
+==================================================
+10. PERFORMANCE AND RESPONSIVENESS
+==================================================
+
+The game must remain playable on:
+
+- laptop/desktop browsers
+- mobile browsers
+
+Do not add effects that significantly reduce performance.
+
+Avoid unnecessary large assets or expensive continuous animations.
+
+Ensure canvas/game scaling remains correct when:
+
+- entering fullscreen
+- leaving fullscreen
+- rotating/resizing the device
+- changing browser window size
+
+==================================================
+11. MOST IMPORTANT DEVELOPMENT RULE
+==================================================
+
+Do NOT rewrite the entire game.
+
+Before changing anything:
+
+1. Inspect the supplied index.html.
+2. Identify existing systems and working functionality.
+3. Preserve those systems.
+4. Make targeted modifications.
+5. Test that existing gameplay still works.
+6. Only then move to the next improvement.
+
+Do not replace functioning mechanics just because you would architect them differently.
+
+Do not remove existing working content unless it directly conflicts with the requirements above.
+
+==================================================
+12. FINAL OUTPUT
+==================================================
+
+Maintain the existing game as the source implementation.
+
+The final playable version must remain a browser game that can be run normally.
+
+If you internally restructure files, that's acceptable, but do not sacrifice working functionality.
+
+Most importantly, produce a complete working game, not a partially implemented redesign.
+
+Prioritize:
+FUNCTIONALITY → GAMEPLAY → READABILITY → POLISH → EXTRA FEATURES.
+
+Do not spend time adding unnecessary features while existing gameplay or transitions are broken.
+
+Before considering the task complete, test the complete flow:
+
+Main Menu
+→ Start Journey
+→ Fullscreen request
+→ Instruction sequence
+→ Chapter 1
+→ Existing chapters
+→ New story chapter
+→ Gajamukhasura battle
+→ Win/Lose
+→ Ending or Retry
+→ Play Again
+
+Make sure there are no broken transitions, stuck states, missing controls, or reset bugs.

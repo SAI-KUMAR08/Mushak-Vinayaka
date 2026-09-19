@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Mushak & Vinayaka: The Vahana's Journey"
+description = "A browser-playable 2D story action-adventure where Mushak and Vinayaka travel through divine courtyards and the Asura realm, solve light puzzles, collect punya, and resolve the Gajamukhasura encounter without gore."
+version = "1.0.0"
+id = "artifacts/mushak-vinayaka"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23752
+
+[services.development]
+run = "pnpm --filter @workspace/mushak-vinayaka run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/mushak-vinayaka", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/mushak-vinayaka/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23752"
+BASE_PATH = "/"
