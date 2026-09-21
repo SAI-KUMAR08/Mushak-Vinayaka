@@ -147,6 +147,18 @@ G.hit = {
 /* ----------------------------------------------------------------- input */
 /* One movement vector feeds both keyboard and the virtual joystick so that
    gameplay code never branches on device type. */
+G.DEFAULT_CONTROLS = {
+  up: 'KeyW',
+  down: 'KeyS',
+  left: 'KeyA',
+  right: 'KeyD',
+  dashDodge: 'Space',
+  interact: 'KeyE',
+  attack: 'KeyJ',
+  divine: 'KeyK',
+  assist: 'KeyL'
+};
+
 G.Input = {
   ax: 0, ay: 0,                 // normalised movement axis (-1..1)
   _down: {}, _press: {},
@@ -161,6 +173,25 @@ G.Input = {
     KeyJ: 'attack', KeyK: 'divine', KeyL: 'assist',
     Space: 'dodge', KeyE: 'interact', Enter: 'interact',
     Escape: 'pause', KeyP: 'pause'
+  },
+
+  applyControls: function (c) {
+    c = c || G.DEFAULT_CONTROLS;
+    var km = {
+      ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right',
+      Enter: 'interact',
+      Escape: 'pause', KeyP: 'pause'
+    };
+    if (c.up) km[c.up] = 'up';
+    if (c.down) km[c.down] = 'down';
+    if (c.left) km[c.left] = 'left';
+    if (c.right) km[c.right] = 'right';
+    if (c.dashDodge) km[c.dashDodge] = 'dodge';
+    if (c.interact) km[c.interact] = 'interact';
+    if (c.attack) km[c.attack] = 'attack';
+    if (c.divine) km[c.divine] = 'divine';
+    if (c.assist) km[c.assist] = 'assist';
+    this.keymap = km;
   },
 
   down: function (a) { return !!this._down[a]; },
@@ -186,6 +217,7 @@ G.Input = {
     I.toLogical = toLogical;
 
     window.addEventListener('keydown', function (e) {
+      if (G.Game && G.Game.onKeyDown && G.Game.onKeyDown(e)) return;
       var a = I.keymap[e.code];
       if (a) { e.preventDefault(); I.setDown(a, true); }
       I.anyKey = true;
@@ -414,7 +446,10 @@ G.Save = {
   key: 'mushak_vinayaka_save_v1',
   data: {
     best: 0, bestStars: 0, introWatched: false, runs: 0,
-    settings: { music: 0.5, sfx: 0.7, shake: true, lowFx: false, skipIntro: false }
+    settings: {
+      music: 0.5, sfx: 0.7, shake: true, lowFx: false, skipIntro: false,
+      controls: Object.assign({}, G.DEFAULT_CONTROLS)
+    }
   },
   load: function () {
     try {
@@ -426,12 +461,26 @@ G.Save = {
           this.data.bestStars = d.bestStars || 0;
           this.data.introWatched = !!d.introWatched;
           this.data.runs = d.runs || 0;
-          if (d.settings) for (var k in d.settings) this.data.settings[k] = d.settings[k];
+          if (d.settings) {
+            for (var k in d.settings) {
+              if (k === 'controls') {
+                this.data.settings.controls = Object.assign({}, G.DEFAULT_CONTROLS, d.settings.controls || {});
+              } else {
+                this.data.settings[k] = d.settings[k];
+              }
+            }
+          }
         }
       }
     } catch (e) { }
+    if (!this.data.settings.controls) {
+      this.data.settings.controls = Object.assign({}, G.DEFAULT_CONTROLS);
+    }
     G.Audio.musicVol = this.data.settings.music;
     G.Audio.sfxVol = this.data.settings.sfx;
+    if (G.Input && G.Input.applyControls) {
+      G.Input.applyControls(this.data.settings.controls);
+    }
     return this.data;
   },
   save: function () {
@@ -1514,7 +1563,7 @@ G.Player.prototype.update = function (dt, g) {
     g.tutorial('dodge');
   }
 
-  if (I.press('attack') && this.atkCd <= 0) {
+  if ((I.press('attack') || (this.tuskReady && !this.tuskThrown && I.press('assist'))) && this.atkCd <= 0) {
     if (this.tuskReady && !this.tuskThrown) {
       this.throwTusk(g);
     } else {
@@ -1546,7 +1595,9 @@ G.Player.prototype.update = function (dt, g) {
   }
 
   if (I.press('assist') && this.assistCd <= 0 && g.companion) {
-    if (g.companion.doAssist(g)) {
+    if (this.tuskReady && !this.tuskThrown) {
+      this.throwTusk(g);
+    } else if (g.companion.doAssist(g)) {
       this.assistCd = T.assistCd;
       g.tutorial('assist');
     }
@@ -3292,6 +3343,10 @@ G.Game = {
         action: function () { S.lowFx = !S.lowFx; G.Save.save(); }
       },
       {
+        label: 'Controls',
+        action: function () { g.openControls(); }
+      },
+      {
         label: 'Skip the opening film', value: function () { return S.skipIntro ? 'on' : 'off'; },
         action: function () { S.skipIntro = !S.skipIntro; G.Save.save(); }
       },
@@ -3979,8 +4034,10 @@ G.Game = {
     if (this.state === 'menu') {
       this.menuMain.update(this.menuLayout(this.menuMain, 330));
     } else if (this.state === 'settings') {
-      this.menuSettings.update(this.menuLayout(this.menuSettings, 170, 44, 10, 420));
+      this.menuSettings.update(this.menuLayout(this.menuSettings, 130, 38, 8, 420));
       if (G.Input.press('pause')) { this.state = this.prevState === 'pause' ? 'pause' : 'menu'; this.prevState = null; }
+    } else if (this.state === 'controls') {
+      this.updateControls();
     } else if (this.state === 'howto') {
       if (G.Input.press('interact') || G.Input.press('pause') || G.Input.pointer.justDown) {
         this.state = this.prevState === 'pause' ? 'pause' : 'menu';
@@ -4022,6 +4079,8 @@ G.Game = {
       this.drawHowTo(ctx);
     } else if (this.state === 'settings') {
       this.drawSettings(ctx);
+    } else if (this.state === 'controls') {
+      this.drawControls(ctx);
     } else if (this.state === 'score') {
       this.drawScore(ctx);
     }
@@ -4251,9 +4310,373 @@ G.Game = {
 
   drawSettings: function (ctx) {
     ctx.fillStyle = '#1B1023'; ctx.fillRect(0, 0, G.W, G.H);
-    G.UI.text(ctx, 'Settings', G.W / 2, 96, G.Font.display(36), '#FFD97A', 'center');
-    this.menuSettings.draw(ctx, this.menuLayout(this.menuSettings, 170, 44, 10, 420));
-    G.UI.text(ctx, 'Settings are kept on this device', G.W / 2, G.H - 26, G.Font.body(14, 500), 'rgba(255,247,230,0.6)', 'center');
+    G.UI.text(ctx, 'Settings', G.W / 2, 78, G.Font.display(36), '#FFD97A', 'center');
+    this.menuSettings.draw(ctx, this.menuLayout(this.menuSettings, 130, 38, 8, 420));
+    G.UI.text(ctx, 'Settings are kept on this device', G.W / 2, G.H - 22, G.Font.body(14, 500), 'rgba(255,247,230,0.6)', 'center');
+  },
+
+
+  /* ------------------------------------------------------------ controls */
+  openControls: function () {
+    this.state = 'controls';
+    this.remapAction = null;
+    this.remapConflict = null;
+    this.remapMessage = '';
+  },
+
+  keyDisplayName: function (code) {
+    if (!code) return 'NONE';
+    if (code.indexOf('Key') === 0) return code.slice(3).toUpperCase();
+    if (code.indexOf('Digit') === 0) return code.slice(5);
+    if (code === 'Space') return 'SPACE';
+    if (code === 'Escape') return 'ESC';
+    if (code === 'Enter') return 'ENTER';
+    if (code === 'ShiftLeft' || code === 'ShiftRight') return 'SHIFT';
+    if (code === 'ControlLeft' || code === 'ControlRight') return 'CTRL';
+    if (code === 'AltLeft' || code === 'AltRight') return 'ALT';
+    if (code === 'ArrowUp') return 'UP';
+    if (code === 'ArrowDown') return 'DOWN';
+    if (code === 'ArrowLeft') return 'LEFT';
+    if (code === 'ArrowRight') return 'RIGHT';
+    if (code === 'Tab') return 'TAB';
+    if (code === 'Backspace') return 'BKSP';
+    if (code === 'Semicolon') return ';';
+    if (code === 'Comma') return ',';
+    if (code === 'Period') return '.';
+    if (code === 'Slash') return '/';
+    if (code === 'Backquote') return '`';
+    if (code === 'Minus') return '-';
+    if (code === 'Equal') return '=';
+    return code.toUpperCase();
+  },
+
+  actionDisplayName: function (act) {
+    var names = {
+      up: 'Move Up',
+      down: 'Move Down',
+      left: 'Move Left',
+      right: 'Move Right',
+      dashDodge: 'Dash / Dodge',
+      interact: 'Interact / Gather',
+      attack: 'Attack',
+      divine: 'Divine Wave',
+      assist: 'Companion Assist'
+    };
+    return names[act] || act;
+  },
+
+  onKeyDown: function (e) {
+    if (this.state !== 'controls') return false;
+
+    // While waiting for a key to remap an action
+    if (this.remapAction) {
+      e.preventDefault();
+      if (e.code === 'Escape') {
+        this.remapAction = null;
+        this.remapConflict = null;
+        this.remapMessage = 'Remapping cancelled.';
+        G.Audio.sfx('ui');
+        return true;
+      }
+
+      // Ignore browser function keys
+      if (e.code === 'F5' || e.code === 'F11' || e.code === 'F12' || e.code === 'Tab') {
+        return false;
+      }
+
+      // Arrow keys are fixed secondary movement
+      if (e.code === 'ArrowUp' || e.code === 'ArrowDown' || e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
+        this.remapMessage = 'Arrow keys are reserved as fixed secondary movement controls.';
+        G.Audio.sfx('asura_hit');
+        return true;
+      }
+
+      var current = G.Save.data.settings.controls;
+      // Check if key is already bound to another action
+      var boundAction = null;
+      for (var act in current) {
+        if (current[act] === e.code) {
+          boundAction = act;
+          break;
+        }
+      }
+
+      if (boundAction === this.remapAction) {
+        this.remapAction = null;
+        this.remapConflict = null;
+        this.remapMessage = this.actionDisplayName(boundAction) + ' kept as ' + this.keyDisplayName(e.code) + '.';
+        G.Audio.sfx('ui');
+        return true;
+      }
+
+      if (boundAction) {
+        // Collision detected
+        if (this.remapConflict && this.remapConflict.code === e.code && this.remapConflict.existingAction === boundAction) {
+          // Second press confirmed: SWAP!
+          var oldKey = current[this.remapAction];
+          current[this.remapAction] = e.code;
+          current[boundAction] = oldKey;
+          var actA = this.remapAction;
+          this.remapAction = null;
+          this.remapConflict = null;
+          this.remapMessage = 'Swapped ' + this.actionDisplayName(actA) + ' (' + this.keyDisplayName(e.code) + ') and ' + this.actionDisplayName(boundAction) + ' (' + this.keyDisplayName(oldKey) + ').';
+          G.Input.applyControls(current);
+          G.Save.save();
+          G.Audio.sfx('ui');
+          return true;
+        } else {
+          // First press: prompt to swap
+          this.remapConflict = { code: e.code, existingAction: boundAction, targetAction: this.remapAction };
+          this.remapMessage = this.keyDisplayName(e.code) + ' is bound to ' + this.actionDisplayName(boundAction) + '. Press again to SWAP, or ESC to cancel.';
+          G.Audio.sfx('ui');
+          return true;
+        }
+      }
+
+      // Key is free!
+      current[this.remapAction] = e.code;
+      var assignedAct = this.remapAction;
+      this.remapAction = null;
+      this.remapConflict = null;
+      this.remapMessage = this.actionDisplayName(assignedAct) + ' set to ' + this.keyDisplayName(e.code) + '.';
+      G.Input.applyControls(current);
+      G.Save.save();
+      G.Audio.sfx('ui');
+      return true;
+    }
+
+    // When not remapping, Escape goes back to settings
+    if (e.code === 'Escape') {
+      e.preventDefault();
+      this.state = 'settings';
+      G.Audio.sfx('ui');
+      return true;
+    }
+
+    return false;
+  },
+
+  updateControls: function () {
+    var I = G.Input;
+    var pointer = I.pointer;
+    var current = G.Save.data.settings.controls;
+
+    // Action button hit testing
+    var actions = [
+      { key: 'up', label: 'Move Up', hint: 'Default W (Arrows also move)' },
+      { key: 'left', label: 'Move Left', hint: 'Default A (Arrows also move)' },
+      { key: 'down', label: 'Move Down', hint: 'Default S (Arrows also move)' },
+      { key: 'right', label: 'Move Right', hint: 'Default D (Arrows also move)' },
+      { key: 'dashDodge', label: 'Dash / Dodge', hint: 'Context: Dash (Companion) / Dodge (Vinayaka)' },
+      { key: 'interact', label: 'Interact / Gather', hint: 'E interacts, gathers flowers, speaks with Parvati' },
+      { key: 'attack', label: 'Vinayaka Attack', hint: 'J strikes foes (also throws tusk in Phase 4)' },
+      { key: 'divine', label: 'Divine Wave', hint: 'K spends energy to repel all nearby foes' },
+      { key: 'assist', label: 'Companion Assist', hint: 'L stuns through guard (also throws tusk in Phase 4)' }
+    ];
+
+    var startY = 106, rowH = 34, gap = 4;
+    var colX = 52, colW = 440;
+
+    if (pointer.justDown) {
+      var px = pointer.x, py = pointer.y;
+
+      // Check action key clicks
+      var clickedAction = false;
+      for (var i = 0; i < actions.length; i++) {
+        var ry = startY + i * (rowH + gap);
+        var btnX = colX + colW - 90, btnY = ry + 2, btnW = 86, btnH = rowH - 4;
+        // Click on entire row or key button
+        if (px >= colX && px <= colX + colW && py >= ry && py <= ry + rowH) {
+          clickedAction = true;
+          this.remapAction = actions[i].key;
+          this.remapConflict = null;
+          this.remapMessage = 'Press any key for ' + actions[i].label + ' (ESC to cancel)';
+          G.Audio.sfx('ui');
+          break;
+        }
+      }
+
+      // Check "Reset to Default" button
+      var rX = 280, rY = 478, rW = 186, rH = 38;
+      if (px >= rX && px <= rX + rW && py >= rY && py <= rY + rH) {
+        G.Save.data.settings.controls = Object.assign({}, G.DEFAULT_CONTROLS);
+        G.Input.applyControls(G.Save.data.settings.controls);
+        G.Save.save();
+        this.remapAction = null;
+        this.remapConflict = null;
+        this.remapMessage = 'Controls reset to default.';
+        G.Audio.sfx('ui');
+        return;
+      }
+
+      // Check "Back" button
+      var bX = 494, bY = 478, bW = 186, bH = 38;
+      if (px >= bX && px <= bX + bW && py >= bY && py <= bY + bH) {
+        this.remapAction = null;
+        this.remapConflict = null;
+        this.state = 'settings';
+        G.Audio.sfx('ui');
+        return;
+      }
+
+      // If clicked outside and currently listening, cancel
+      if (!clickedAction && this.remapAction) {
+        this.remapAction = null;
+        this.remapConflict = null;
+        this.remapMessage = '';
+      }
+    }
+  },
+
+  drawControls: function (ctx) {
+    ctx.fillStyle = '#1B1023';
+    ctx.fillRect(0, 0, G.W, G.H);
+
+    // Subtle dark ambient vignette
+    var grd = ctx.createRadialGradient(G.W / 2, G.H / 2, G.H * 0.2, G.W / 2, G.H / 2, G.H * 0.7);
+    grd.addColorStop(0, 'rgba(40,20,60,0.3)');
+    grd.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, G.W, G.H);
+
+    // Header Title
+    G.UI.text(ctx, 'Controls & Input Settings', G.W / 2, 42, G.Font.display(30), '#FFD97A', 'center');
+    G.UI.text(ctx, 'Customize keyboard bindings • Mobile uses automatic on-screen controls',
+      G.W / 2, 64, G.Font.body(13, 500), 'rgba(255,247,230,0.65)', 'center');
+
+    var current = G.Save.data.settings.controls || G.DEFAULT_CONTROLS;
+
+    // LEFT COLUMN: Keyboard Remapping
+    var col1X = 52, col1W = 440;
+    G.UI.text(ctx, 'KEYBOARD BINDINGS', col1X, 94, G.Font.display(14), '#F2A81D');
+    G.UI.text(ctx, '(Click any row to remap)', col1X + 175, 94, G.Font.body(11, 400), 'rgba(255,247,230,0.45)');
+
+    var actions = [
+      { key: 'up', label: 'Move Up', context: 'W  (Arrow Up also moves)' },
+      { key: 'left', label: 'Move Left', context: 'A  (Arrow Left also moves)' },
+      { key: 'down', label: 'Move Down', context: 'S  (Arrow Down also moves)' },
+      { key: 'right', label: 'Move Right', context: 'D  (Arrow Right also moves)' },
+      { key: 'dashDodge', label: 'Dash / Dodge', context: 'Context: Dash (Companion) / Dodge (Vinayaka)' },
+      { key: 'interact', label: 'Interact / Gather', context: 'Gather offerings, talk, pull levers' },
+      { key: 'attack', label: 'Vinayaka Attack', context: 'Strike foes (Throws tusk in Phase 4)' },
+      { key: 'divine', label: 'Divine Wave', context: 'Repel foes with divine energy' },
+      { key: 'assist', label: 'Companion Assist', context: 'Stun foes (Throws tusk in Phase 4)' }
+    ];
+
+    var startY = 106, rowH = 34, gap = 4;
+    var mx = G.Input.pointer.x, my = G.Input.pointer.y;
+
+    for (var i = 0; i < actions.length; i++) {
+      var act = actions[i];
+      var ry = startY + i * (rowH + gap);
+      var isHover = (mx >= col1X && mx <= col1X + col1W && my >= ry && my <= ry + rowH);
+      var isRemapping = (this.remapAction === act.key);
+
+      // Row background
+      ctx.fillStyle = isRemapping ? 'rgba(242,168,29,0.22)' : (isHover ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.03)');
+      G.UI.roundRect(ctx, col1X, ry, col1W, rowH, 6);
+      ctx.fill();
+
+      // Row border
+      ctx.strokeStyle = isRemapping ? '#FFD97A' : (isHover ? 'rgba(242,168,29,0.5)' : 'rgba(255,255,255,0.08)');
+      ctx.lineWidth = isRemapping ? 1.5 : 1;
+      G.UI.roundRect(ctx, col1X, ry, col1W, rowH, 6);
+      ctx.stroke();
+
+      // Action label
+      G.UI.text(ctx, act.label, col1X + 12, ry + 15, G.Font.body(13, 600), isRemapping ? '#FFD97A' : '#FFF7E6');
+      G.UI.text(ctx, act.context, col1X + 12, ry + 27, G.Font.body(10, 400), 'rgba(255,247,230,0.5)');
+
+      // Key button box
+      var btnX = col1X + col1W - 90, btnY = ry + 3, btnW = 82, btnH = rowH - 6;
+      ctx.fillStyle = isRemapping ? '#F2A81D' : 'rgba(15,10,25,0.85)';
+      G.UI.roundRect(ctx, btnX, btnY, btnW, btnH, 4);
+      ctx.fill();
+
+      ctx.strokeStyle = isRemapping ? '#FFF7E6' : (isHover ? '#FFD97A' : 'rgba(242,168,29,0.55)');
+      ctx.lineWidth = isRemapping ? 2 : 1;
+      G.UI.roundRect(ctx, btnX, btnY, btnW, btnH, 4);
+      ctx.stroke();
+
+      var keyTxt = isRemapping ? 'PRESS...' : this.keyDisplayName(current[act.key]);
+      G.UI.text(ctx, keyTxt, btnX + btnW / 2, btnY + btnH / 2 + 4, G.Font.body(11, 700),
+        isRemapping ? '#1B1023' : '#FFD97A', 'center');
+    }
+
+    // RIGHT COLUMN: Mobile Controls & Legend
+    var col2X = 520, col2W = 390;
+    G.UI.text(ctx, 'MOBILE & TOUCH CONTROLS', col2X, 94, G.Font.display(14), '#F2A81D');
+    G.UI.text(ctx, '(Active on touch screens)', col2X + 225, 94, G.Font.body(11, 400), 'rgba(255,247,230,0.45)');
+
+    var mobileInfo = [
+      { label: 'Virtual Joystick', desc: 'Drag left side for 360° omnidirectional movement' },
+      { label: 'DASH  (Companion)', desc: 'Quick dash through tight crevices and past hazards' },
+      { label: 'USE  (Companion)', desc: 'Interact with switches, flowers, and sacred shrines' },
+      { label: 'HIT  (Vinayaka)', desc: 'Melee weapon strikes / Throws tusk in Phase 4' },
+      { label: 'DIVINE  (Vinayaka)', desc: 'Radial holy blast that sweeps back surrounding foes' },
+      { label: 'DODGE  (Vinayaka)', desc: 'Evasive dodge granting momentary invulnerability' },
+      { label: 'ALLY  (Vinayaka)', desc: 'Companion assist: breaks heavy guard / Throws tusk' },
+      { label: 'II  (Top-Right)', desc: 'Pause game, view level status, or resume anytime' }
+    ];
+
+    var mStartY = 106, mRowH = 38, mGap = 5;
+    for (var m = 0; m < mobileInfo.length; m++) {
+      var item = mobileInfo[m];
+      var myy = mStartY + m * (mRowH + mGap);
+
+      ctx.fillStyle = 'rgba(255,255,255,0.03)';
+      G.UI.roundRect(ctx, col2X, myy, col2W, mRowH, 6);
+      ctx.fill();
+
+      ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+      ctx.lineWidth = 1;
+      G.UI.roundRect(ctx, col2X, myy, col2W, mRowH, 6);
+      ctx.stroke();
+
+      G.UI.text(ctx, item.label, col2X + 14, myy + 16, G.Font.body(12, 700), '#FFD97A');
+      G.UI.text(ctx, item.desc, col2X + 14, myy + 30, G.Font.body(11, 400), 'rgba(255,247,230,0.65)');
+    }
+
+    // Status / Message banner
+    var msgY = 456;
+    if (this.remapMessage) {
+      var isWarning = !!this.remapConflict;
+      ctx.fillStyle = isWarning ? 'rgba(214,67,47,0.22)' : 'rgba(242,168,29,0.14)';
+      G.UI.roundRect(ctx, G.W / 2 - 340, msgY - 14, 680, 26, 6);
+      ctx.fill();
+      ctx.strokeStyle = isWarning ? '#D6432F' : 'rgba(242,168,29,0.6)';
+      ctx.lineWidth = 1;
+      G.UI.roundRect(ctx, G.W / 2 - 340, msgY - 14, 680, 26, 6);
+      ctx.stroke();
+      G.UI.text(ctx, this.remapMessage, G.W / 2, msgY + 3, G.Font.body(12, 600),
+        isWarning ? '#FFB4A8' : '#FFD97A', 'center');
+    } else {
+      G.UI.text(ctx, 'Select any action above to change key. ESC pauses during game or cancels remapping.',
+        G.W / 2, msgY + 2, G.Font.body(12, 500), 'rgba(255,247,230,0.45)', 'center');
+    }
+
+    // BOTTOM BUTTONS: Reset to Default & Back
+    var rX = 280, rY = 478, rW = 186, rH = 38;
+    var bX = 494, bY = 478, bW = 186, bH = 38;
+
+    var rHover = (mx >= rX && mx <= rX + rW && my >= rY && my <= rY + rH);
+    var bHover = (mx >= bX && mx <= bX + bW && my >= bY && my <= bY + bH);
+
+    // Reset button
+    ctx.fillStyle = rHover ? P.gold : 'rgba(27,17,9,0.85)';
+    G.UI.roundRect(ctx, rX, rY, rW, rH, 8); ctx.fill();
+    ctx.strokeStyle = rHover ? '#FFF7E6' : 'rgba(242,168,29,0.6)'; ctx.lineWidth = 2;
+    G.UI.roundRect(ctx, rX, rY, rW, rH, 8); ctx.stroke();
+    G.UI.text(ctx, 'Reset to Default', rX + rW / 2, rY + rH / 2 + 5, G.Font.body(15, 600),
+      rHover ? '#2B1A08' : '#F6EBD8', 'center');
+
+    // Back button
+    ctx.fillStyle = bHover ? P.gold : 'rgba(27,17,9,0.85)';
+    G.UI.roundRect(ctx, bX, bY, bW, bH, 8); ctx.fill();
+    ctx.strokeStyle = bHover ? '#FFF7E6' : 'rgba(242,168,29,0.6)'; ctx.lineWidth = 2;
+    G.UI.roundRect(ctx, bX, bY, bW, bH, 8); ctx.stroke();
+    G.UI.text(ctx, 'Back to Settings', bX + bW / 2, bY + bH / 2 + 5, G.Font.body(15, 600),
+      bHover ? '#2B1A08' : '#F6EBD8', 'center');
   },
 
   drawPause: function (ctx) {
