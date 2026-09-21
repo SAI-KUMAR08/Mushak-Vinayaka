@@ -245,8 +245,8 @@ G.Input = {
       // on-screen button?
       var b = I.buttonAt(L.x, L.y);
       if (b) { b.held = true; b.id = e.pointerId; I.setDown(b.action, true); return; }
-      // joystick zone = left half, lower two thirds
-      if (L.x < G.W * 0.5 && L.y > G.H * 0.25 && !I.joy.active) {
+      // joystick zone = left half, lower two thirds (gameplay only)
+      if ((!G.Game || G.Game.state === 'play') && L.x < G.W * 0.5 && L.y > G.H * 0.25 && !I.joy.active) {
         I.joy.active = true; I.joy.id = e.pointerId;
         I.joy.bx = L.x; I.joy.by = L.y; I.joy.dx = 0; I.joy.dy = 0;
       }
@@ -3844,6 +3844,7 @@ G.Game = {
       case 'menu':
       case 'howto':
       case 'settings':
+      case 'controls':
       case 'defeat':
       case 'score':
         this.updateScreens();
@@ -4038,6 +4039,10 @@ G.Game = {
       if (G.Input.press('pause')) { this.state = this.prevState === 'pause' ? 'pause' : 'menu'; this.prevState = null; }
     } else if (this.state === 'controls') {
       this.updateControls();
+      if (!this.remapAction && G.Input.press('pause')) {
+        this.state = 'settings';
+        G.Audio.sfx('ui');
+      }
     } else if (this.state === 'howto') {
       if (G.Input.press('interact') || G.Input.press('pause') || G.Input.pointer.justDown) {
         this.state = this.prevState === 'pause' ? 'pause' : 'menu';
@@ -4459,19 +4464,18 @@ G.Game = {
   updateControls: function () {
     var I = G.Input;
     var pointer = I.pointer;
-    var current = G.Save.data.settings.controls;
 
     // Action button hit testing
     var actions = [
-      { key: 'up', label: 'Move Up', hint: 'Default W (Arrows also move)' },
-      { key: 'left', label: 'Move Left', hint: 'Default A (Arrows also move)' },
-      { key: 'down', label: 'Move Down', hint: 'Default S (Arrows also move)' },
-      { key: 'right', label: 'Move Right', hint: 'Default D (Arrows also move)' },
-      { key: 'dashDodge', label: 'Dash / Dodge', hint: 'Context: Dash (Companion) / Dodge (Vinayaka)' },
-      { key: 'interact', label: 'Interact / Gather', hint: 'E interacts, gathers flowers, speaks with Parvati' },
-      { key: 'attack', label: 'Vinayaka Attack', hint: 'J strikes foes (also throws tusk in Phase 4)' },
-      { key: 'divine', label: 'Divine Wave', hint: 'K spends energy to repel all nearby foes' },
-      { key: 'assist', label: 'Companion Assist', hint: 'L stuns through guard (also throws tusk in Phase 4)' }
+      { key: 'up', label: 'Move Up' },
+      { key: 'left', label: 'Move Left' },
+      { key: 'down', label: 'Move Down' },
+      { key: 'right', label: 'Move Right' },
+      { key: 'dashDodge', label: 'Dash / Dodge' },
+      { key: 'interact', label: 'Interact / Gather' },
+      { key: 'attack', label: 'Vinayaka Attack' },
+      { key: 'divine', label: 'Divine Wave' },
+      { key: 'assist', label: 'Companion Assist' }
     ];
 
     var startY = 106, rowH = 34, gap = 4;
@@ -4480,23 +4484,7 @@ G.Game = {
     if (pointer.justDown) {
       var px = pointer.x, py = pointer.y;
 
-      // Check action key clicks
-      var clickedAction = false;
-      for (var i = 0; i < actions.length; i++) {
-        var ry = startY + i * (rowH + gap);
-        var btnX = colX + colW - 90, btnY = ry + 2, btnW = 86, btnH = rowH - 4;
-        // Click on entire row or key button
-        if (px >= colX && px <= colX + colW && py >= ry && py <= ry + rowH) {
-          clickedAction = true;
-          this.remapAction = actions[i].key;
-          this.remapConflict = null;
-          this.remapMessage = 'Press any key for ' + actions[i].label + ' (ESC to cancel)';
-          G.Audio.sfx('ui');
-          break;
-        }
-      }
-
-      // Check "Reset to Default" button
+      // 1. Check "Reset to Default" button
       var rX = 280, rY = 478, rW = 186, rH = 38;
       if (px >= rX && px <= rX + rW && py >= rY && py <= rY + rH) {
         G.Save.data.settings.controls = Object.assign({}, G.DEFAULT_CONTROLS);
@@ -4509,7 +4497,7 @@ G.Game = {
         return;
       }
 
-      // Check "Back" button
+      // 2. Check "Back" button
       var bX = 494, bY = 478, bW = 186, bH = 38;
       if (px >= bX && px <= bX + bW && py >= bY && py <= bY + bH) {
         this.remapAction = null;
@@ -4517,6 +4505,21 @@ G.Game = {
         this.state = 'settings';
         G.Audio.sfx('ui');
         return;
+      }
+
+      // 3. Check action key clicks
+      var clickedAction = false;
+      for (var i = 0; i < actions.length; i++) {
+        var ry = startY + i * (rowH + gap);
+        // Click on entire row or key button
+        if (px >= colX && px <= colX + colW && py >= ry && py <= ry + rowH) {
+          clickedAction = true;
+          this.remapAction = actions[i].key;
+          this.remapConflict = null;
+          this.remapMessage = 'Press any key for ' + actions[i].label + ' (ESC to cancel)';
+          G.Audio.sfx('ui');
+          return;
+        }
       }
 
       // If clicked outside and currently listening, cancel
@@ -4588,7 +4591,7 @@ G.Game = {
       G.UI.text(ctx, act.context, col1X + 12, ry + 27, G.Font.body(10, 400), 'rgba(255,247,230,0.5)');
 
       // Key button box
-      var btnX = col1X + col1W - 90, btnY = ry + 3, btnW = 82, btnH = rowH - 6;
+      var btnX = col1X + col1W - 116, btnY = ry + 3, btnW = 110, btnH = rowH - 6;
       ctx.fillStyle = isRemapping ? '#F2A81D' : 'rgba(15,10,25,0.85)';
       G.UI.roundRect(ctx, btnX, btnY, btnW, btnH, 4);
       ctx.fill();
@@ -4598,7 +4601,7 @@ G.Game = {
       G.UI.roundRect(ctx, btnX, btnY, btnW, btnH, 4);
       ctx.stroke();
 
-      var keyTxt = isRemapping ? 'PRESS...' : this.keyDisplayName(current[act.key]);
+      var keyTxt = isRemapping ? '[ Press key... ]' : this.keyDisplayName(current[act.key]);
       G.UI.text(ctx, keyTxt, btnX + btnW / 2, btnY + btnH / 2 + 4, G.Font.body(11, 700),
         isRemapping ? '#1B1023' : '#FFD97A', 'center');
     }
