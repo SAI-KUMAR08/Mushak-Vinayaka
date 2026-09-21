@@ -1,0 +1,420 @@
+I need you to modify the existing game, not rebuild it from scratch.
+
+IMPORTANT: Preserve the existing game architecture, gameplay mechanics, characters, assets, story, chapters, controls, scoring, and working functionality unless I explicitly ask you to change them.
+
+I am providing:
+
+The current game/source code.
+A reference image for the desired opening screen.
+The game recordings showing the current problems.
+The logo asset.
+
+Use the supplied reference image and recordings as the visual source of truth.
+
+1. FIX THE COMPLETE GAME START FLOW
+
+The current game has an unwanted extra opening page.
+
+Remove that extra opening page completely.
+
+The game must now have exactly this flow:
+
+STEP 1 — FIRST SCREEN
+
+When the player opens the game, the very first screen must look like the reference image I provided.
+
+It should show:
+
+The Mushak & Vinayaka visual
+The same overall composition and atmosphere as the reference
+Game title:
+Mushak & Vinayaka
+Subtitle:
+The Vahana's Journey
+Main button:
+Start the Journey
+Secondary button:
+How to Play
+Secondary button:
+Settings
+
+Do not create another intro/menu before this screen.
+
+This is the game's actual landing screen.
+
+STEP 2 — START THE JOURNEY
+
+When the player clicks:
+
+Start the Journey
+
+do the following:
+
+Request browser fullscreen.
+Enter fullscreen mode.
+Immediately load the Tips/Rules screen.
+
+Do NOT show another title screen, character-selection screen, loading page, or additional intro between these stages.
+
+2. TIPS / RULES SCREEN
+
+After clicking Start the Journey, display the Tips/Rules screen.
+
+The Tips/Rules screen must have:
+
+Black/dark background
+Clean centered layout
+Small, readable typography
+Proper spacing
+No gigantic text
+No unnecessary decorative elements
+No oversized logo in the centre
+CRITICAL FONT FIX
+
+The current Tips/Rules text is HUGE.
+
+It is not merely slightly too large.
+
+It is far too large for a game instruction screen.
+
+Reduce the typography substantially.
+
+The rules should fit naturally within the screen without dominating the entire viewport.
+
+Use a clear hierarchy:
+
+TITLE
+
+Medium/large but controlled
+
+RULES
+
+Normal readable size
+Comfortable line spacing
+
+CONTROLS
+
+Normal readable size
+
+CONTINUE / START
+
+Clearly visible button
+
+Do not allow text to overflow, wrap awkwardly, or require excessive scrolling.
+
+The player should be able to understand the rules in a few seconds.
+
+3. REMOVE THE EXTRA LOGO FROM THE TIPS/RULES SCREEN
+
+Do not place the large logo in the middle/top of the Tips/Rules page.
+
+Instead, use the provided logo as a small fixed logo in the bottom-right corner, matching the visual reference I supplied.
+
+Requirements:
+
+Bottom-right
+Small
+Subtle
+Doesn't overlap controls
+Doesn't cover gameplay/UI
+Doesn't dominate the screen
+Maintains correct aspect ratio
+Transparent background if the supplied logo has transparency
+
+The logo should feel like branding, not like the main content.
+
+4. GAME STARTS ONLY AFTER TIPS/RULES
+
+After the player finishes the Tips/Rules screen and clicks the appropriate continue/start button:
+
+Start the actual game.
+
+The game should then begin directly with the first gameplay chapter.
+
+Do not insert another generated opening/menu.
+
+5. REMOVE THE PILLAR VISIBILITY BUG
+
+I checked the gameplay recordings carefully.
+
+There is a major visual/gameplay problem with the pillars.
+
+The Mushak moves behind/beneath the pillars and becomes partially or completely hidden.
+
+This happens during movement in the courtyard section.
+
+This is visible in the supplied recording.
+
+Do NOT simply solve this with z-index.
+
+I do not want the player character fighting with foreground objects for visibility.
+
+The simplest and cleanest solution is:
+
+REMOVE THE MOVING/OBSTRUCTING PILLARS FROM THE PLAYABLE MOVEMENT PATH.
+
+Do not redesign the entire level.
+
+Remove the pillars/structures that cause the character to disappear behind them.
+
+The player must always remain clearly visible.
+
+6. IMPORTANT VISIBILITY RULE
+
+At all times:
+
+The player-controlled character must be clearly visible.
+
+Nothing should move in front of the player character and obscure:
+
+Body
+Face
+Movement
+Collision feedback
+Collectible interaction
+
+Do not place foreground objects over the character unless they are intentionally transparent and cannot obstruct gameplay.
+
+If environmental decoration is required, keep it:
+
+Behind the player
+Beside the player
+Outside the playable path
+7. DO NOT BREAK THE EXISTING GAMEPLAY
+
+Do NOT remove or rewrite:
+
+Mushak movement
+Vinayaka movement
+Existing chapter system
+Story progression
+Objectives
+Health system
+Score system
+Collectibles
+Existing interactions
+Existing combat
+Existing role switching
+Existing win/lose logic
+Existing animations
+Existing sound system
+
+unless necessary for the specific fixes above.
+
+The goal is refinement, not rebuilding.
+
+8. PRESERVE THE STORY-DRIVEN ROLE SWITCHING
+
+The game uses automatic role switching based on the story.
+
+Do NOT add a character-selection screen.
+
+The player does NOT choose Mushak or Vinayaka from the opening menu.
+
+The game controls the role according to the story:
+
+Mushak
+
+Use Mushak for:
+
+Travelling
+Exploring
+Helping Parvati
+Collecting items
+Finding food
+Small tasks
+Scouting
+Supporting Vinayaka
+Other lighter activities
+Vinayaka
+
+Use Vinayaka for:
+
+Major divine tasks
+Fighting asuras
+Important encounters
+Major challenges
+Major story moments
+
+The transition should happen naturally as part of the story.
+
+9. OPENING SCREEN REFERENCE
+
+The supplied reference image is the visual direction for the actual first screen.
+
+Do not redesign it into a completely different UI.
+
+Preserve its:
+
+Overall composition
+Colour atmosphere
+Character placement
+Button hierarchy
+Title placement
+Visual style
+Background feeling
+
+You may improve spacing, responsiveness and polish, but don't replace the concept.
+
+10. OPENING ANIMATION — IMPORTANT
+
+The opening animation should NOT become a long cinematic.
+
+The actual playable experience should start quickly.
+
+The opening visual should communicate the divine blessing moment.
+
+The animation concept is:
+
+Vinayaka is already shown with the elephant head.
+A soft divine glow appears around the neck/head area.
+The glow becomes slightly brighter.
+Vinayaka gently floats upward a small distance.
+While floating, Vinayaka slowly rotates horizontally.
+The rotation should be smooth and graceful.
+Soft divine particles/light rays can appear around him.
+He completes the rotation.
+Vinayaka turns toward the front.
+He gently descends.
+He lands on the ground.
+The scene settles.
+
+Keep this short.
+
+Do not make it a 2–3 minute cinematic.
+
+The player should be able to start playing quickly.
+
+11. RESPONSIVE DESIGN
+
+The opening screen and Tips/Rules screen must work properly on:
+
+Desktop
+Laptop
+Tablet
+Mobile
+
+Do not hard-code dimensions that break at different resolutions.
+
+The game viewport should adapt to the available screen while maintaining the intended composition.
+
+12. FULLSCREEN BEHAVIOUR
+
+When the player clicks:
+
+Start the Journey
+
+attempt to enter browser fullscreen.
+
+If the browser blocks automatic fullscreen, provide a clear fallback message/button such as:
+
+Enter Fullscreen
+
+Do not leave the player stuck on a broken transition.
+
+Once fullscreen is active:
+
+Tips/Rules → Game
+
+should happen cleanly.
+
+13. FINAL REQUIRED FLOW
+
+After making the changes, the player experience must be:
+
+OPEN GAME
+   ↓
+MAIN OPENING SCREEN
+(Mushak & Vinayaka reference image/style)
+   ↓
+Click "Start the Journey"
+   ↓
+ENTER FULLSCREEN
+   ↓
+TIPS / RULES
+(black background + appropriately sized text)
+   ↓
+Click Continue / Begin
+   ↓
+OPENING DIVINE SCENE
+(short animation)
+   ↓
+CHAPTER 1
+   ↓
+GAMEPLAY
+
+There must be NO extra opening page.
+
+There must be NO character-selection screen.
+
+There must be NO huge Tips/Rules typography.
+
+There must be NO foreground/moving pillars hiding Mushak.
+
+14. TEST BEFORE FINISHING
+
+After implementing the changes, actually test the complete flow from a fresh page load.
+
+Test:
+
+Test A
+
+Open game → verify the reference-style opening screen appears first.
+
+Test B
+
+Click Start the Journey → verify fullscreen transition.
+
+Test C
+
+Verify Tips/Rules screen appears immediately after fullscreen.
+
+Test D
+
+Verify Tips/Rules text is significantly smaller and properly laid out.
+
+Test E
+
+Continue → verify game starts without another unwanted page.
+
+Test F
+
+Play the first Mushak section.
+
+Move Mushak across the entire playable area.
+
+Verify that Mushak is never hidden behind pillars or foreground objects.
+
+Test G
+
+Verify the bottom-right logo does not overlap anything.
+
+Test H
+
+Verify the game still transitions correctly into the existing chapters and gameplay.
+
+Do not stop after changing the CSS. Test the actual gameplay flow.
+
+VERY IMPORTANT
+
+Do not generate a new game.
+
+This is an existing working game.
+
+Your task is to surgically fix the flow, UI, opening experience and visibility problems while preserving the existing game.
+
+If an existing implementation already works, keep it.
+
+Only change what is required by this prompt.
+
+After completing the changes, tell me exactly:
+
+What files you changed.
+What caused the pillar visibility bug.
+What you changed to fix it.
+What caused the extra opening page.
+What you changed to remove it.
+Where the logo is now positioned.
+How the final game-start flow works.
+
+Do not claim something is fixed unless you actually tested it.

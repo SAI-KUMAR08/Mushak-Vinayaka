@@ -179,50 +179,7 @@ function GameSurface({ onLeave }: { onLeave: () => void }) {
 }
 
 function Home() {
-  const [surface, setSurface] = useState<Surface>('landing');
-  const [instructionIndex, setInstructionIndex] = useState(0);
-
-  useEffect(() => {
-    if (surface !== 'instructions') return;
-    const delay = window.setTimeout(() => {
-      if (instructionIndex === instructions.length - 1) {
-        setSurface('game');
-      } else {
-        setInstructionIndex((current) => current + 1);
-      }
-    }, 2600);
-    return () => window.clearTimeout(delay);
-  }, [instructionIndex, surface]);
-
-  const requestFullscreen = () => {
-    const root = document.documentElement;
-    if (root.requestFullscreen && !document.fullscreenElement) {
-      void root.requestFullscreen().catch(() => undefined);
-    }
-  };
-
-  const startJourney = () => {
-    requestFullscreen();
-    setInstructionIndex(0);
-    setSurface('instructions');
-  };
-
-  const leaveJourney = () => {
-    if (document.fullscreenElement && document.exitFullscreen) {
-      void document.exitFullscreen().catch(() => undefined);
-    }
-    setSurface('landing');
-  };
-
-  if (surface === 'instructions') {
-    return <InstructionSurface index={instructionIndex} />;
-  }
-
-  if (surface === 'game') {
-    return <GameSurface onLeave={leaveJourney} />;
-  }
-
-  return <LandingSurface onStart={startJourney} />;
+  return <GameSurface onLeave={() => {}} />;
 }
 
 function Router() {
