@@ -999,7 +999,9 @@ G.Art = {
     ctx.beginPath(); ctx.moveTo(-18, -2); ctx.lineTo(-8, -2); ctx.lineTo(-14, 18); ctx.lineTo(-22, 18); ctx.closePath(); ctx.fill();
 
     // torso
-    ctx.fillStyle = P.skin;
+    var torsoGrd = ctx.createRadialGradient(-6, -14, 4, 0, -8, 24);
+    torsoGrd.addColorStop(0, '#FFE0AE'); torsoGrd.addColorStop(1, P.skinDp);
+    ctx.fillStyle = torsoGrd;
     ctx.beginPath(); ctx.ellipse(0, -8, 19, 16, 0, 0, Math.PI * 2); ctx.fill();
     // sacred thread
     ctx.strokeStyle = P.white; ctx.lineWidth = 2;
@@ -1029,7 +1031,9 @@ G.Art = {
     ctx.fillStyle = 'rgba(255,255,255,0.14)';
     ctx.beginPath(); ctx.ellipse(20, 2, 8, 11, 0.25, 0, Math.PI * 2); ctx.fill();
     // skull
-    ctx.fillStyle = P.skin;
+    var headGrd = ctx.createRadialGradient(-5, -8, 3, 0, -2, 22);
+    headGrd.addColorStop(0, '#FFE7BC'); headGrd.addColorStop(1, P.skin);
+    ctx.fillStyle = headGrd;
     ctx.beginPath(); ctx.ellipse(0, -2, 17, 16, 0, 0, Math.PI * 2); ctx.fill();
     // crown
     ctx.fillStyle = P.gold;
