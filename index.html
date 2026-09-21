@@ -1588,7 +1588,7 @@ G.Player.prototype.draw = function (ctx) {
 };
 
 /* ------------------------------------------------------------ companion */
-/* Mushak stays with Vinayaka and is the key to the boss fight. */
+/* Companion stays with Vinayaka and is the key to the boss fight. */
 G.Companion = function (x, y) {
   this.x = x; this.y = y; this.r = 12; this.t = 0;
   this.state = 'follow'; this.target = null; this.timer = 0;
@@ -2301,7 +2301,7 @@ G.Chapters.push(function () {
       g.say([
         { name: 'Parvati', text: 'You gathered every offering, little one. Vinayaka is fortunate in his friend.' },
         { name: 'Parvati', text: 'Dark news travels from the eastern path. Go with him, and watch over each other.' },
-        { name: 'Mushak', text: 'I will not leave his side.' }
+        { name: 'Companion', text: 'I will not leave his side.' }
       ], function () { g.completeChapter(); });
       G.Audio.sfx('bell');
       G.FX.burst(750, 300, 40, { colors: ['#FFD97A', '#F2A81D', '#FFF7E6'], smax: 220, lmax: 1.4, grav: -20 });
@@ -2327,7 +2327,7 @@ G.Chapters.push(function () {
   }
   for (var b = 0; b < 8; b++) L.props.push({ type: 'bush', x: 260 + b * 210, y: 520 + (b % 3) * 120, w: 70, h: 50 });
 
-  // the rock wall that blocks the way, with a crack only Mushak can slip through
+  // the rock wall that blocks the way, with a crack only the Companion can slip through
   var rockRows = [160, 290, 420, 550, 800, 930, 1060];
   for (var r = 0; r < rockRows.length; r++) {
     L.props.push({ type: 'rock', x: 1180, y: rockRows[r], w: 110, h: 130 });
@@ -2355,7 +2355,7 @@ G.Chapters.push(function () {
 
   L.onEnter = function (g) {
     g.setObjective('Follow the eastern path');
-    g.say([{ name: 'Mushak', text: 'The path east. Vinayaka is only a few steps behind me.' }]);
+    g.say([{ name: 'Companion', text: 'The path east. Vinayaka is only a few steps behind me.' }]);
   };
   L.onUpdate = function (g, dt) {
     var l = g.level;
@@ -2426,7 +2426,7 @@ G.Chapters.push(function () {
     if (l.found >= 3 && l.stage === 0) {
       l.stage = 1;
       g.say([
-        { name: 'Mushak', text: 'Asura tracks, and the stone still burns cold. Vinayaka, this is beyond me.' },
+        { name: 'Companion', text: 'Asura tracks, and the stone still burns cold. Vinayaka, this is beyond me.' },
         { name: 'Vinayaka', text: 'Then stand behind me, friend. Whatever waits here answers to me now.' }
       ], function () {
         G.Audio.sfx('switch');
@@ -2445,7 +2445,7 @@ G.Chapters.push(function () {
       vent: 'The ground breathes out cold smoke. Something opened a door here.',
       shard: 'The shard hums. It remembers a name: Gajamukhasura.'
     };
-    g.say([{ name: 'Mushak', text: lines[obj.key] }]);
+    g.say([{ name: 'Companion', text: lines[obj.key] }]);
   };
   return L;
 });
@@ -2485,13 +2485,13 @@ G.Chapters.push(function () {
           g.spawnEnemy('small', 1050, 620); g.spawnEnemy('small', 1000, 250);
           l.waveT = 1.0;
         } else if (l.wave === 2) {
-          g.toast('MUSHAK ASSIST (L) sends your friend to stun an asura');
+          g.toast('COMPANION ASSIST (L) sends your friend to stun an asura');
           g.spawnEnemy('small', 300, 200); g.spawnEnemy('heavy', 1000, 500);
           l.waveT = 1.0;
         } else if (l.wave === 3) {
           g.say([
             { name: 'Vinayaka', text: 'They came from the vent. Whoever sent them is waiting below.' },
-            { name: 'Mushak', text: 'Then I will find the way down.' }
+            { name: 'Companion', text: 'Then I will find the way down.' }
           ], function () { g.completeChapter(); });
           l.wave = 4;
         }
@@ -2547,7 +2547,7 @@ G.Chapters.push(function () {
 
   L.onEnter = function (g) {
     g.setObjective('Turn both seals beneath the gate (0/2)');
-    g.say([{ name: 'Mushak', text: 'Small tunnels. Finally, something built for me.' }]);
+    g.say([{ name: 'Companion', text: 'Small tunnels. Finally, something built for me.' }]);
   };
   L.onUpdate = function (g, dt) { };
   L.onInteract = function (g, obj) {
@@ -2565,7 +2565,7 @@ G.Chapters.push(function () {
       G.Audio.sfx('switch'); G.Camera.kick(8);
       G.FX.burst(1815, 520, 46, { colors: ['#9B6BD6', '#FFD97A', '#FFF7E6'], smax: 300, lmax: 1.2 });
       g.say([
-        { name: 'Mushak', text: 'It is open, Vinayaka. The realm beyond is yours to walk.' },
+        { name: 'Companion', text: 'It is open, Vinayaka. The realm beyond is yours to walk.' },
         { name: 'Vinayaka', text: 'We walk it together. Stay close to me.' }
       ], function () { g.completeChapter(); });
     }
@@ -2705,7 +2705,7 @@ G.Chapters.push(function () {
       type: 'say', lines: [
         { name: 'Vinayaka', text: 'What is left is a small, swift thing - and a place beside me, if you will carry the journey rather than block it.' },
         { name: 'Gajamukhasura', text: 'Then I will carry it. I am your vahana.' },
-        { name: 'Mushak', text: 'And I am still his friend. There is room for both.' }
+        { name: 'Companion', text: 'And I am still his friend. There is room for both.' }
       ]
     },
     { type: 'do', fn: function (g) { g.completeChapter(); } }
@@ -2751,7 +2751,7 @@ G.Chapters.push(function () {
   L.onEnter = function (g) {
     g.setObjective('Return to the courtyard');
     g.toast('Nothing hunts you here. Gather what you like');
-    g.say([{ name: 'Mushak', text: 'Quiet again. Mother will want the flowers first, then the story.' }]);
+    g.say([{ name: 'Companion', text: 'Quiet again. Mother will want the flowers first, then the story.' }]);
   };
   L.onUpdate = function (g, dt) { };
   return L;
@@ -2909,7 +2909,7 @@ G.UI = {
   hintShield: function () {
     if (this.hintT > 0) return;
     this.hintT = 2.6;
-    this.hint = 'His guard holds. Send Mushak in first.';
+    this.hint = 'His guard holds. Send Companion in first.';
   },
 
   /* ----------------------------------------------------------- dialogue */
@@ -2987,7 +2987,7 @@ G.UI = {
       this.roundRect(ctx, ax, ay, 190, 16, 8); ctx.fill();
       ctx.fillStyle = cd > 0 ? 'rgba(255,217,122,0.35)' : P.goldLt;
       this.roundRect(ctx, ax + 2, ay + 2, Math.max(4, 186 * (1 - cd / full)), 12, 6); ctx.fill();
-      this.text(ctx, cd > 0 ? 'Mushak returning ' + cd.toFixed(1) + 's' : 'Mushak ready',
+      this.text(ctx, cd > 0 ? 'Companion returning ' + cd.toFixed(1) + 's' : 'Companion ready',
         ax + 8, ay + 13, G.Font.body(11, 600), cd > 0 ? 'rgba(255,247,230,0.8)' : '#2B1A08');
     }
 
@@ -3072,7 +3072,7 @@ G.UI = {
     ctx.clip();
     var t = performance && performance.now ? performance.now() / 1000 : 0;
     var who = line.name;
-    if (who === 'Mushak') G.Art.mushak(ctx, { x: x + 52, y: y + h / 2 + 8, t: t, scale: 1.25, faceRight: true });
+    if (who === 'Mushak' || who === 'Companion') G.Art.mushak(ctx, { x: x + 52, y: y + h / 2 + 8, t: t, scale: 1.25, faceRight: true });
     else if (who === 'Vinayaka') G.Art.vinayaka(ctx, { x: x + 54, y: y + h / 2 + 22, t: t, scale: 0.92, faceRight: true, aura: 0.1 });
     else if (who === 'Parvati') G.Art.parvati(ctx, { x: x + 54, y: y + h / 2 + 18, t: t, scale: 0.78 });
     else G.Art.asura(ctx, { x: x + 54, y: y + h / 2 + 14, t: t, scale: 0.95, heavy: true, faceRight: true });
@@ -3111,7 +3111,7 @@ G.UI = {
       btn('attack', 'HIT', rightX, baseY, 42, '#F2A81D');
       btn('divine', 'DIVINE', rightX - 92, baseY - 26, 36, '#7FC7FF');
       btn('dodge', 'DODGE', rightX - 26, baseY - 96, 34, '#F3E3C3');
-      btn('assist', 'MUSHAK', rightX - 118, baseY - 104, 34, '#D6432F');
+      btn('assist', 'ALLY', rightX - 118, baseY - 104, 34, '#D6432F');
     }
     // pause button is always tappable
     I.buttons.push({ action: 'pause', label: 'II', x: G.W - 26, y: 22, r: 18, color: '#F3E3C3', visible: true, held: false, id: null });
@@ -3361,7 +3361,7 @@ G.Game = {
     var col1X = 65, col2X = 515;
 
     // Column 1: Mushak (Scout & Explorer)
-    G.UI.text(ctx, 'MUSHAK  (Scout & Explorer)', col1X, 102, G.Font.display(15), '#F2A81D');
+    G.UI.text(ctx, 'COMPANION  (Scout & Explorer)', col1X, 102, G.Font.display(15), '#F2A81D');
     var mRules = [
       ['WASD / Arrows', 'Move around pathways and colonnades'],
       ['SPACE', 'Dash quickly through narrow cracks and dangers'],
@@ -3378,7 +3378,7 @@ G.Game = {
     var vRules = [
       ['J', 'Strike asuras when they leave an opening'],
       ['K', 'Divine light wave (spends energy to repel foes)'],
-      ['L', 'Mushak Assist (stuns asuras through heavy guard)'],
+      ['L', 'Companion Assist (stuns asuras through heavy guard)'],
       ['SPACE', 'Dodge attacks with brief invulnerability']
     ];
     for (var j = 0; j < vRules.length; j++) {
@@ -3398,7 +3398,7 @@ G.Game = {
 
     G.UI.text(ctx, '\u2022 Gather modaks, durva grass, and temple flowers to increase your punya score.',
       G.W / 2, noteY + 8, G.Font.body(13, 500), 'rgba(255,247,230,0.85)', 'center');
-    G.UI.text(ctx, '\u2022 Role switching between Mushak and Vinayaka occurs naturally with the story.',
+    G.UI.text(ctx, '\u2022 Role switching between Companion and Vinayaka occurs naturally with the story.',
       G.W / 2, noteY + 28, G.Font.body(13, 500), 'rgba(255,247,230,0.85)', 'center');
     G.UI.text(ctx, '\u2022 Watch for red enemy attack indicators on the ground before moving in.',
       G.W / 2, noteY + 48, G.Font.body(13, 500), 'rgba(255,247,230,0.85)', 'center');
@@ -3713,7 +3713,7 @@ G.Game = {
       this.spawnBossHealingOrb();
     }
     if (n === 3) {
-      this.toast('His guard closes. Mushak must break it open');
+      this.toast('His guard closes. Companion must break it open');
       G.UI.hintShield();
       if (this.level && this.level.id === 'boss') {
         this.spawnBossHealingOrb();
@@ -3722,7 +3722,7 @@ G.Game = {
     if (n === 4) {
       this.player.tuskReady = true;
       this.toast('He is weakened. Strike when the core opens');
-      this.say([{ name: 'Vinayaka', text: 'Now, Mushak. One throw, and this ends without blood.' }]);
+      this.say([{ name: 'Vinayaka', text: 'Now, Companion. One throw, and this ends without blood.' }]);
     }
   },
   spawnBossHealingOrb: function () {
@@ -4230,9 +4230,9 @@ G.Game = {
     ctx.fillStyle = '#1B1023'; ctx.fillRect(0, 0, G.W, G.H);
     G.UI.text(ctx, 'How to play', G.W / 2, 66, G.Font.display(36), '#FFD97A', 'center');
     var lines = [
-      ['Mushak', 'Move with WASD, the arrows, or the joystick. Space dashes. E interacts.'],
+      ['Companion', 'Move with WASD, the arrows, or the joystick. Space dashes. E interacts.'],
       ['Vinayaka', 'J strikes. K spends energy on a divine wave. Space dodges with a moment of safety.'],
-      ['Mushak assist', 'L sends Mushak in to stun an asura. It is the only way through Gajamukhasura\u2019s guard.'],
+      ['Companion assist', 'L sends Companion in to stun an asura. It is the only way through Gajamukhasura\u2019s guard.'],
       ['The tusk', 'Held back until the boss is weakened, then thrown when his core opens.'],
       ['Scoring', 'Modaks, flowers, durva and divine marks all count. Damage and retries cost you.'],
       ['Pause', 'ESC on a keyboard, or the button in the corner on a touch screen.']
@@ -4305,7 +4305,7 @@ G.Game = {
       ['Flowers and durva', s.flowers + s.durva, s.flowers * 30 + s.durva * 20],
       ['Divine marks', s.divine, s.divine * 90],
       ['Asuras turned back', s.kills, s.killPoints],
-      ['Mushak assists', s.assists, s.assistPoints],
+      ['Companion assists', s.assists, s.assistPoints],
       ['Damage taken', Math.round(s.damage), -Math.round(s.damage * 6)],
       ['Retries', s.retries, -s.retries * 250],
       ['Time  ' + mm + ':' + (ss < 10 ? '0' : '') + ss, '', f.timeBonus]
